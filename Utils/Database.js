@@ -6,37 +6,42 @@ dotenv.config();
 const password = process.env.DB_PASS;
 const uri = `mongodb+srv://mikemills930:${password}@cluster0.hbyydft.mongodb.net/checkout?retryWrites=true&w=majority`;
 
-const client = new MongoClient(uri, {
-    serverApi: {
-        version: '1',
-        strict: true,
-        deprecationErrors: true,
-    }
-});
+class Database {
+    static client = null;
 
-export const DataBase = {
-    Connect: async () => {
+    static async connect() {
         try {
-            await client.connect();
-            return client;
+            if (Database.client) {
+                return Database.client;
+            }
+    
+            Database.client = new MongoClient(uri, {
+                serverApi: {
+                    version: '1',
+                    strict: true,
+                    deprecationErrors: true,
+                },
+            });
+    
+            await Database.client.connect();
+    
+            return Database.client;
         } catch (error) {
-            throw new Error("Failed to connect with MongoDB: " + error.message);
+            console.error("Error connecting to the database:", error.message);
+            throw new Error("Error connecting to the database");
         }
-        
-    },
-    InsertData: async (db, collection, data) => {
+    }    
+
+    static async disconnect() {
         try {
-            const Db = client.db(db);
-            const Collection = Db.collection(collection);
-            
-            const result = await Collection.insertMany([
-                { data }
-            ]);
-            
-            console.log('results', result);
-            return result;
+            if (Database.client) {
+                await Database.client.close();
+            }
+            console.log("Disconnected from MongoDB");
         } catch (error) {
-            throw new Error(`Failed to insert data into ${collection}: ${error.message}`);
+            console.error("Error disconnecting from MongoDB:", error.message);
         }
-    },
-};
+    }
+}
+
+export default Database;
