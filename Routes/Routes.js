@@ -8,8 +8,7 @@ import {
     loginEmailAndPassword, 
     deleteData, 
     subTask, } from '../Controller/controller.js';
-import { validateInput} from '../Middeware/middleware.js'
-import validateEmail from '../Middeware/middleware.js'
+import { validateInput, validateEmail} from '../Middeware/middleware.js'
 
 const router = express.Router();
 
